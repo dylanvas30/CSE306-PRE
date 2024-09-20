@@ -5,7 +5,7 @@
 bool use_header = true;
 
 int count_records(char* filename){
-  FILE fp = fopen(filename, "r");
+  FILE *fp = fopen(filename, "r");
 
   int line_count = 0;
   char line[1024];
@@ -23,9 +23,9 @@ int count_records(char* filename){
 
 }
 
-int fields_first_row(char filename) {
+int fields_first_row(char* filename) {
   printf("function called\n");
-  FILE file = fopen(filename, "r");
+  FILE *file = fopen(filename, "r");
 
   char temp[1024];
   if (fgets(temp, sizeof(temp), file) == NULL) {
@@ -34,7 +34,7 @@ int fields_first_row(char filename) {
     return -1;
   }
   //printf("function called 1");
-  //fclose(file);
+  fclose(file);
   printf("function called 2\n");
   int field_count = 1;
   for (int i = 0; temp[i] != '\0'; i++) {
@@ -47,7 +47,7 @@ int fields_first_row(char filename) {
   return 0;
 }
 //-------------------------------------------------------------------------------------------------------
-int main(int argc, char argv[]) {
+int main(int argc, char* argv[]) {
 
   printf("argument 1: %s\n", argv[1]);
   printf("argument 2: %s\n", argv[2]);

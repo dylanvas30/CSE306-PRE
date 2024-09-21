@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>
+#include <float.h>
+#include <stdlib.h>
 
 bool use_header = true;
 
@@ -47,6 +49,54 @@ int fields_first_row(char* filename) {
   return 0;
 }
 //-------------------------------------------------------------------------------------------------------
+
+//  minimum vfunction
+
+double minFunc(char* fileName, int fields){
+
+  FILE *file = fopen(fileName, "r");
+  char line[1024];
+  double min = DBL_MAX;
+
+  while(fgets(line,sizeof(line),file)){
+    char* token = strtok(line, ",");
+    for(int i = 0; i<fields-1 && token != NULL; i++){
+      token = strtok(NULL, ",");
+    }
+    if(token){
+      double value = atof(token);
+      if(value <min){
+	min=value;
+      }
+    }
+  }
+  fclose(file);
+  return min;
+} 
+
+// max function
+
+double maxFunc(char* fileName, int fields){
+  FILE *file = fopen(fileName, "r");
+  char line[1024];
+  double max = -DBL_MAX;
+
+  while (fgets(line,sizeof(line),file)){
+    char* token = strtok(line, ",");
+    for(int i=0; i<fields-1 && token != NULL; i++){
+      token = strtok(NULL, ",");
+    }
+    if(token){
+      double value = atof(token);
+      if(value>max){
+	max = value;
+      }
+    }
+  }
+  fclose(file);
+  return max;
+}
+
 int main(int argc, char* argv[]) {
 
   printf("argument 1: %s\n", argv[1]);
@@ -70,6 +120,16 @@ int main(int argc, char* argv[]) {
       //display number of data records in file, keeping in mind that the first line may or may not count
       int num_records = count_records(filename);
       printf("%d", num_records);
+    }
+    if(strcmp(argv[1],"-min")==0){
+	int fields = atoi(argv[2]);
+	double min = minFunc(filename, fields);
+	printf("min value %d: %.2f", fields, min);
+      }
+    if(strcmp(argv[1], "-max")==0){
+      int fields = atoi(argv[2]);
+      double max = maxFunc(filename, fields);
+      printf("max val %d: %.2f", fields , max); 
     }
   } else {
     printf("You must specify a file name and parameters");

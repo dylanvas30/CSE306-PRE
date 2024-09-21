@@ -3,3 +3,5 @@ DATE, UBIT, DURATION, ACTIVITY & TOOL DESCRIPTION
 2024/09/18, dmvasapo, 20 minutes, fixed complation issues
 2024/09/20, dmvasapo, 90 minutes, implemeneted min and max
 2024/09/19, msinghla, 90 minutes, implemented -r -f -h
+2024/09/20, manavkan, 30 minutes, fixing segmentation fault bugs and other bugs that were breaking code during testing and compilation
+2024/09/20, manavkan, 4 hours, making arithmetic mean and records field value functions

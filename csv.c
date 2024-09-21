@@ -8,6 +8,10 @@ bool use_header = true;
 
 int count_records(char* filename){
   FILE *fp = fopen(filename, "r");
+  if (!fp) {
+        perror("File opening failed");
+        return -1;  // Error handling for file not found
+    }
 
   int line_count = 0;
   char line[1024];
@@ -28,6 +32,10 @@ int count_records(char* filename){
 int fields_first_row(char* filename) {
   printf("function called\n");
   FILE *file = fopen(filename, "r");
+  if (!file) {
+        perror("File opening failed");
+        return -1;  // Error handling for file not found
+    }
 
   char temp[1024];
   if (fgets(temp, sizeof(temp), file) == NULL) {
@@ -55,8 +63,13 @@ int fields_first_row(char* filename) {
 double minFunc(char* fileName, int fields){
 
   FILE *file = fopen(fileName, "r");
+  if (!file) {
+        perror("File opening failed");
+        return -1;  // Error handling for file not found
+    }
   char line[1024];
   double min = DBL_MAX;
+  int count = 0;
 
   while(fgets(line,sizeof(line),file)){
     char* token = strtok(line, ",");
@@ -68,9 +81,14 @@ double minFunc(char* fileName, int fields){
       if(value <min){
 	min=value;
       }
+      count++;
     }
   }
   fclose(file);
+  if (count == 0) {
+        printf("Error: No valid numeric data found in field %d\n", fields);
+        return -1;
+    }
   return min;
 } 
 
@@ -78,8 +96,13 @@ double minFunc(char* fileName, int fields){
 
 double maxFunc(char* fileName, int fields){
   FILE *file = fopen(fileName, "r");
+  if (!file) {
+        perror("File opening failed");
+        return -1;  // Error handling for file not found
+    }
   char line[1024];
   double max = -DBL_MAX;
+  int count = 0;
 
   while (fgets(line,sizeof(line),file)){
     char* token = strtok(line, ",");
@@ -89,12 +112,77 @@ double maxFunc(char* fileName, int fields){
     if(token){
       double value = atof(token);
       if(value>max){
-	max = value;
+	      max = value;
       }
+      count++;
     }
   }
   fclose(file);
+  if (count == 0) {
+        printf("Error: No valid numeric data found in field %d\n", fields);
+        return -1;
+    }
   return max;
+}
+
+// mean function
+
+double meanFunc(char* fileName, int fields) {
+    FILE *fp = fopen(fileName, "r");
+    if (!fp) {
+        perror("File opening failed");
+        return -1;  // Error handling for file not found
+    }
+
+    char line[1024];
+    double tsum = 0.0;
+    int count = 0;
+
+    while (fgets(line, sizeof(line), fp)) {
+        char* token = strtok(line, ",");
+        for (int i = 0; i < fields - 1 && token != NULL; i++) {
+            token = strtok(NULL, ",");
+        }
+        if (token) {
+            double value = atof(token);
+            tsum += value;
+            count++;
+        }
+    }
+    
+    fclose(fp);
+
+    if (count == 0) {
+        printf("Error: No valid numeric data found in field %d\n", fields);
+        return -1;
+    }
+    //printf("mean is:\n");
+
+    return tsum/count;
+}
+
+// records field value function
+
+void recordsFunc(char* fileName, int fields, const char* value) {
+    FILE *fp = fopen(fileName, "r");
+    if (!fp) {
+        perror("File opening failed");
+        return;  // Error handling for file not found
+    }
+
+    char line[1024];
+    while (fgets(line, sizeof(line), fp)) {
+        char* token = strtok(line, ",");
+        for (int i = 0; i < fields - 1 && token != NULL; i++) {
+            token = strtok(NULL, ",");
+        }
+        if (token && strcmp(token, value) == 0) {
+            // Print record with matching value
+            printf("%s", line);
+        }
+    }
+    
+    fclose(fp);
 }
 
 int main(int argc, char* argv[]) {
@@ -108,6 +196,16 @@ int main(int argc, char* argv[]) {
   char* filename = argv[num_arguments];
   printf("%s\n", filename);
   printf("%d\n",num_arguments != 1);
+  char* flag = argv[1];
+  if (strcmp(flag, "-mean") == 0) {
+      int fields = atoi(argv[2]);
+      double mean = meanFunc(filename, fields);
+      printf("mean value in field %d: %.2f\n", fields, mean);
+  } else if (strcmp(flag, "-records") == 0) {
+      int fields = atoi(argv[2]);
+      char* value = argv[3];
+      recordsFunc(filename, fields, value);
+  }
   if (num_arguments !=  1){
     printf("\n");
     //printf("%s",argv[1]);
@@ -131,7 +229,15 @@ int main(int argc, char* argv[]) {
       double max = maxFunc(filename, fields);
       printf("max val %d: %.2f", fields , max); 
     }
-  } else {
+  } else if (strcmp(flag, "-mean") == 0) {
+      int fields = atoi(argv[2]);
+      double mean = meanFunc(filename, fields);
+      printf("mean value in field %d: %.2f\n", fields, mean);
+  } else if (strcmp(flag, "-records") == 0) {
+      int fields = atoi(argv[2]);
+      char* value = argv[3];
+      recordsFunc(filename, fields, value);
+  }else {
     printf("You must specify a file name and parameters");
   }
 
